@@ -58,18 +58,45 @@ http {
 
     error_page 404 451 /404.html;
     location = /404.html {
-        internal;
+      internal;
     }
 
     error_page 500 502 503 504 /50x.html;
     location = /50x.html {
-        internal;
+      internal;
     }
 
     location /.well-known/apple-app-site-association {
-        default_type application/json;
+      default_type application/json;
     }
 
     include locations.conf;
+  }
+
+  server {
+    listen <%= ENV["PORT"] %>;
+    server_name r.opass.app r-staging.opass.app;
+    keepalive_timeout 5;
+    client_max_body_size <%= ENV['NGINX_CLIENT_MAX_BODY_SIZE'] || 1 %>M;
+
+    root /app/public; # path to your app
+
+    error_page 404 451 /404.html;
+    location = /404.html {
+      internal;
+    }
+
+    error_page 500 502 503 504 /50x.html;
+    location = /50x.html {
+      internal;
+    }
+
+    location /.well-known/apple-app-site-association {
+      default_type application/json;
+    }
+
+    location ~* ^/(?P<event_id>[^/]+)/(?P<token>[^/]+)/?$ {
+      return 302 https://dl.opass.app/?link=https%3A%2F%2Fopass.app%2Fopen%2F%3Fevent_id%3D${event_id}%26token%3D${token}&isi=1436417025&ibi=app.opass.ccip&apn=app.opass.ccip&amv=40;
+    }
   }
 }
